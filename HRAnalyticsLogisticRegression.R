@@ -1,4 +1,4 @@
-setwd('C:\\Users\\putripat\\Downloads\\PA-I_Case_Study_HR_Analytics')
+#setwd('C:\\Users\\putripat\\Downloads\\PA-I_Case_Study_HR_Analytics')
 
 # Comment the next line
 #setwd("D:/pgdds/Logistic Regression/LogisticRegressionCaseStudy")
@@ -12,7 +12,7 @@ library(cowplot)
 library(caTools)
 library(GGally)
 library(lubridate)
-
+library(reshape2)
 # Loading data file
 
 employee_survey_data<-read.csv("employee_survey_data.csv")
@@ -83,5 +83,14 @@ emptimedf <- as.data.frame( cbind(intime$X, sapply(outtime[,2:250] - intime[,2:2
 emptimedf[, 2:250][is.na(emptimedf[, 2:250])] <- 0
 colnames(emptimedf)[names(emptimedf) == "V1"] = "EmployeeID"
 str(emptimedf)
+
+
+temp_df <- melt(emptimedf, id=c("EmployeeID"))
+temp_df$month <- substr(temp_df$variable,7,8)
+
+emp_avghours_pw <- aggregate(value~EmployeeID, temp_df, sum)
+emp_avghours_pw$value <- emp_avghours_pw$value/52
+
+emp_extraOffs <- aggregate(value~EmployeeID, temp_df[temp_df$value==0,], length)
 
 View(employeeHr) #semi master file
