@@ -92,5 +92,7 @@ emp_avghours_pw <- aggregate(value~EmployeeID, temp_df, sum)
 emp_avghours_pw$value <- emp_avghours_pw$value/52
 
 emp_extraOffs <- aggregate(value~EmployeeID, temp_df[temp_df$value==0,], length)
-
+colnames(emp_avghours_pw)[names(emp_avghours_pw) == "value"] = "avg_wrokhours_per_week"
+colnames(emp_extraOffs)[names(emp_extraOffs) == "value"] = "Num_of_days_off"
+metrics_emptime <- cbind(emp_avghours_pw,emp_extraOffs)
 View(employeeHr) #semi master file
