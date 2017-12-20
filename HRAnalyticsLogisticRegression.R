@@ -102,3 +102,53 @@ employeeHr$overwork = ifelse(employeeHr$avg_wrokhours_per_week/40> 1, 1, 0)
 colnames(employeeHr)[names(employeeHr) == "emp_extraOffs$Num_of_days_off"] = "Num_of_days_off"
 # Master dataset
 View(employeeHr) 
+length(names(employeeHr))
+
+#Start of EDA
+bar_theme1<- theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5), 
+                   legend.position="none")
+
+factor_Vars <- names(employeeHr)[sapply(employeeHr, class) == "factor"]
+
+plot_grid(ggplot(employeeHr, aes(x=BusinessTravel,fill=Attrition))+ geom_bar()+bar_theme1,
+          ggplot(employeeHr, aes(x=EducationField,fill=Attrition))+ geom_bar()+bar_theme1,
+          ggplot(employeeHr, aes(x=Gender,fill=Attrition))+ geom_bar()+bar_theme1,
+          ggplot(employeeHr, aes(x=MaritalStatus,fill=Attrition))+ geom_bar()+bar_theme1,
+          ggplot(employeeHr, aes(x=Over18,fill=Attrition))+ geom_bar()+bar_theme1,
+          align = "v") 
+
+plot_grid(ggplot(employeeHr, aes(x=Department,fill=Attrition))+ geom_bar()+bar_theme1,
+          ggplot(employeeHr, aes(x=JobRole,fill=Attrition))+ geom_bar()+bar_theme1,
+          align = "v")  
+
+plot_grid(ggplot(employeeHr, aes(x=EnvironmentSatisfaction,fill=Attrition))+ geom_bar()+bar_theme1,
+          ggplot(employeeHr, aes(x=JobSatisfaction,fill=Attrition))+ geom_bar()+bar_theme1,
+          ggplot(employeeHr, aes(x=WorkLifeBalance,fill=Attrition))+ geom_bar()+bar_theme1,
+          ggplot(employeeHr, aes(x=Education,fill=Attrition))+ geom_bar()+bar_theme1,
+          align = "h") 
+
+plot_grid(ggplot(employeeHr, aes(x=StockOptionLevel,fill=Attrition))+ geom_bar()+bar_theme1,
+          ggplot(employeeHr, aes(x=as.factor(PerformanceRating),fill=Attrition))+ geom_bar()+bar_theme1,
+          ggplot(employeeHr, aes(x=JobInvolvement,fill=Attrition))+ geom_bar()+bar_theme1,
+          align = "v") 
+ggplot(employeeHr, aes(x=as.factor(NumCompaniesWorked),fill=Attrition))+ geom_bar()+bar_theme1
+
+ggplot(employeeHr, aes(x=Attrition,y=YearsWithCurrManager)) + geom_boxplot()
+ggplot(employeeHr, aes(x=Attrition,y=YearsAtCompany)) + geom_boxplot()
+ggplot(employeeHr, aes(x=Attrition,y=DistanceFromHome)) + geom_boxplot()
+ggplot(employeeHr, aes(x=Attrition,y=Age)) + geom_boxplot()
+ggplot(employeeHr, aes(x=Attrition,y=PercentSalaryHike)) + geom_boxplot()
+ggplot(employeeHr, aes(x=Attrition,y=TotalWorkingYears)) + geom_boxplot()
+ggplot(employeeHr, aes(x=Attrition,y=TrainingTimesLastYear)) + geom_boxplot()
+ggplot(employeeHr, aes(x=Attrition,y=YearsSinceLastPromotion)) + geom_boxplot()
+ggplot(employeeHr, aes(x=Attrition,y=avg_wrokhours_per_week)) + geom_boxplot()
+ggplot(employeeHr, aes(x=Attrition,y=Num_of_days_off)) + geom_boxplot()
+ggplot(employeeHr, aes(x=Attrition,y=NumCompaniesWorked)) + geom_boxplot()
+
+
+ggplot(employeeHr, aes(x=avg_wrokhours_per_week)) + geom_histogram(bins = 40)
+ggplot(employeeHr, aes(x=DistanceFromHome)) + geom_histogram(bins = 15)
+ggplot(employeeHr, aes(x=PercentSalaryHike)) + geom_histogram(bins=15)
+ggplot(employeeHr, aes(x=Age)) + geom_histogram(bins=25)
+ggplot(employeeHr, aes(x=TrainingTimesLastYear)) + geom_histogram(bins=10)
+ggplot(employeeHr, aes(x=YearsAtCompany)) + geom_histogram(bins=15)
