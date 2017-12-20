@@ -1,7 +1,7 @@
 #setwd('C:\\Users\\putripat\\Downloads\\PA-I_Case_Study_HR_Analytics')
 
 # Comment the next line
-#setwd("D:/pgdds/Logistic Regression/LogisticRegressionCaseStudy")
+setwd("D:/pgdds/Logistic Regression/LogisticRegressionCaseStudy")
 ##### Importing the necessary libraries #####
 library(MASS)
 library(car)
@@ -94,5 +94,5 @@ emp_avghours_pw$value <- emp_avghours_pw$value/52
 emp_extraOffs <- aggregate(value~EmployeeID, temp_df[temp_df$value==0,], length)
 colnames(emp_avghours_pw)[names(emp_avghours_pw) == "value"] = "avg_wrokhours_per_week"
 colnames(emp_extraOffs)[names(emp_extraOffs) == "value"] = "Num_of_days_off"
-metrics_emptime <- cbind(emp_avghours_pw,emp_extraOffs)
+metrics_emptime <- cbind(emp_avghours_pw,emp_extraOffs$Num_of_days_off)
 View(employeeHr) #semi master file
