@@ -1,7 +1,7 @@
-#setwd('C:\\Users\\putripat\\Downloads\\PA-I_Case_Study_HR_Analytics')
+setwd('C:\\Users\\putripat\\Downloads\\PA-I_Case_Study_HR_Analytics')
 
 # Comment the next line
-setwd("D:/pgdds/Logistic Regression/LogisticRegressionCaseStudy")
+#setwd("D:/pgdds/Logistic Regression/LogisticRegressionCaseStudy")
 ##### Importing the necessary libraries #####
 library(MASS)
 library(car)
@@ -52,6 +52,7 @@ setdiff(employee_survey_data$EmployeeID,out_time$X) # Identical EmployeeID acros
 employeeHr<- merge(employee_survey_data,general_data, by="EmployeeID", all = F)
 employeeHr<- merge(employeeHr,manager_survey_data, by="EmployeeID", all = F)
 
+
 cols_with_na <- colnames(employeeHr)[colSums(is.na(employeeHr)) > 0]
 
 cols_with_na
@@ -95,4 +96,9 @@ emp_extraOffs <- aggregate(value~EmployeeID, temp_df[temp_df$value==0,], length)
 colnames(emp_avghours_pw)[names(emp_avghours_pw) == "value"] = "avg_wrokhours_per_week"
 colnames(emp_extraOffs)[names(emp_extraOffs) == "value"] = "Num_of_days_off"
 metrics_emptime <- cbind(emp_avghours_pw,emp_extraOffs$Num_of_days_off)
-View(employeeHr) #semi master file
+
+employeeHr<- merge(employeeHr,metrics_emptime, by="EmployeeID", all = F)
+employeeHr$overwork = ifelse(employeeHr$avg_wrokhours_per_week/40> 1, 1, 0) 
+colnames(employeeHr)[names(employeeHr) == "emp_extraOffs$Num_of_days_off"] = "Num_of_days_off"
+# Master dataset
+View(employeeHr) 
