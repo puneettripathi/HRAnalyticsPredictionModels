@@ -129,7 +129,7 @@ View(employeeHr)
 length(names(employeeHr))
 #32 Columns
 
-#Start of EDA
+##### Start of EDA #####
 # Create theme for bar plot
 bar_theme1<- theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5), 
                    legend.position="none")
@@ -142,7 +142,7 @@ plot_grid(ggplot(employeeHr, aes(x=BusinessTravel,fill=Attrition))+ geom_bar()+b
           ggplot(employeeHr, aes(x=EducationField,fill=Attrition))+ geom_bar()+bar_theme1,
           ggplot(employeeHr, aes(x=Gender,fill=Attrition))+ geom_bar()+bar_theme1,
           ggplot(employeeHr, aes(x=MaritalStatus,fill=Attrition))+ geom_bar()+bar_theme1,
-          ggplot(employeeHr, aes(x=Over18,fill=Attrition))+ geom_bar()+bar_theme1,
+          ggplot(employeeHr, aes(x=as.factor(JobLevel),fill=Attrition))+ geom_bar()+bar_theme1,
           align = "v") 
 
 # BusinessTravel has a clear impact on attrition
@@ -183,9 +183,6 @@ ggplot(employeeHr, aes(x=Attrition,y=YearsWithCurrManager)) + geom_boxplot()
 # Years with manager looks to be a key in attrition
 # People who have left have a median relation of 2.5 years with current manager
 
-ggplot(employeeHr, aes(x=Attrition,y=YearsAtCompany)) + geom_boxplot()
-# People who have spent lesser time at company tends to resign more
-
 plot_grid(ggplot(employeeHr, aes(x=Attrition,y=DistanceFromHome)) + geom_boxplot(),
           ggplot(employeeHr, aes(x=DistanceFromHome)) + geom_histogram(bins = 15),
           align="h")
@@ -205,22 +202,48 @@ plot_grid(ggplot(employeeHr, aes(x=Attrition,y=PercentSalaryHike)) + geom_boxplo
 # doesn't appear to affect attrition directly
 # mostly people get 10 to 15% salary hike
 
-ggplot(employeeHr, aes(x=Attrition,y=TotalWorkingYears)) + geom_boxplot()
+plot_grid(ggplot(employeeHr, aes(x=Attrition,y=TotalWorkingYears)) + geom_boxplot(),
+          ggplot(employeeHr, aes(x=TotalWorkingYears)) + geom_histogram(bins = 40))
+# People leaving company have median 7 years of experience and have relatively lower overall experience
+# This might mean as people get more experienced they tend to stay at same company for longer time
 
 
 
-
-# Looks like most people have 2 or 3 times training 
-# it seems to have lesser impact on attrition, as both show same characteristics
 
 ggplot(employeeHr, aes(x=Attrition,y=YearsSinceLastPromotion)) + geom_boxplot()
-ggplot(employeeHr, aes(x=Attrition,y=avg_wrokhours_per_week)) + geom_boxplot()
-ggplot(employeeHr, aes(x=Attrition,y=Num_of_days_off)) + geom_boxplot(
+# Looks like people are trying to change job soon after getting promotion
+# that might make sense as well because that means reaching higher salary/ higher grade jump in relatively lower time span
+
+plot_grid(ggplot(employeeHr, aes(x=Attrition,y=avg_wrokhours_per_week)) + geom_boxplot(),
+          ggplot(employeeHr, aes(x=avg_wrokhours_per_week)) + geom_histogram(bins = 40))
+# People resigning are those who are generally overworked
+# Mostlypeople are working less than 35 hours & very few over 50
+
+ggplot(employeeHr, aes(x=Attrition,y=Num_of_days_off)) + geom_boxplot()
+# People resigning are those who are generally take fewer holidays in a year
+
+plot_grid(ggplot(employeeHr, aes(x=Attrition,y=YearsAtCompany)) + geom_boxplot(),
+          ggplot(employeeHr, aes(x=YearsAtCompany)) + geom_histogram(bins=15))
+# People who have spent lesser time at company tends to resign more
+# Mostly people have stayed less than 10 years at the company
+
+plot_grid(ggplot(employeeHr, aes(x=as.factor(TrainingTimesLastYear),fill=Attrition))+ geom_bar(),
+          ggplot(employeeHr, aes(x=Attrition,y=TrainingTimesLastYear)) + geom_boxplot(),
+          ggplot(employeeHr, aes(x=TrainingTimesLastYear)) + geom_histogram(bins=10))
+# Looks like most people have 2 or 3 times training 
+# And people leaving company are mainly those with 2 to 3 trainings
+# Median is also at 75th %ile which is 3 trainings per year, data is highly skewed
+
+ggplot(employeeHr, aes(x=Attrition,y=MonthlyIncome)) + geom_boxplot()
+# people leaving jobs are relatively low paid
+# Which is right as Salary is one of tha major reason people change jobs for
 
 
-ggplot(employeeHr, aes(x=avg_wrokhours_per_week)) + geom_histogram(bins = 40)
+#set.seed(1)
+#df <- data.frame(y=abs(rnorm(6)),
+#                 x=rep(as.Date(c('2011-01-01','2011-01-03','2011-01-10')),
+#                       times = 2),
+#                 g = factor(rep(c(1,2), each = 3)))    
+#ggplot(aes(x=x, y=y, group = g, fill = g), data = df) +
+#  geom_bar(stat = 'identity', position = 'dodge')
 
-
-
-ggplot(employeeHr, aes(x=YearsAtCompany)) + geom_histogram(bins=15)
-ggplot(employeeHr, aes(x=TrainingTimesLastYear)) + geom_histogram(bins=10)
