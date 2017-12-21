@@ -1,7 +1,7 @@
 setwd('C:\\Users\\putripat\\Downloads\\PA-I_Case_Study_HR_Analytics')
 
 # Comment the next line
-#setwd("D:/pgdds/Logistic Regression/LogisticRegressionCaseStudy")
+setwd("D:/pgdds/Logistic Regression/LogisticRegressionCaseStudy")
 ##### Importing the necessary libraries #####
 library(MASS)
 library(car)
@@ -13,6 +13,7 @@ library(caTools)
 library(GGally)
 library(lubridate)
 library(reshape2)
+library(outliers)
 
 ##### Importing CSV data to DataFrames #####
 employee_survey_data<-read.csv("employee_survey_data.csv")
@@ -196,6 +197,7 @@ plot_grid(ggplot(employeeHr, aes(x=Attrition,y=Age)) + geom_boxplot(),
 # Mostly work force has age between 25 to 50
 # People resigning appears to be relatively younger ones
 
+
 plot_grid(ggplot(employeeHr, aes(x=Attrition,y=PercentSalaryHike)) + geom_boxplot(),
           ggplot(employeeHr, aes(x=PercentSalaryHike)) + geom_histogram(bins=15))
 # Doesn't seem to have outlier 
@@ -206,9 +208,6 @@ plot_grid(ggplot(employeeHr, aes(x=Attrition,y=TotalWorkingYears)) + geom_boxplo
           ggplot(employeeHr, aes(x=TotalWorkingYears)) + geom_histogram(bins = 40))
 # People leaving company have median 7 years of experience and have relatively lower overall experience
 # This might mean as people get more experienced they tend to stay at same company for longer time
-
-
-
 
 ggplot(employeeHr, aes(x=Attrition,y=YearsSinceLastPromotion)) + geom_boxplot()
 # Looks like people are trying to change job soon after getting promotion
@@ -236,9 +235,9 @@ plot_grid(ggplot(employeeHr, aes(x=as.factor(TrainingTimesLastYear),fill=Attriti
 
 # Salary Analysis
 employeeHr$incomegroup = ifelse(0 < employeeHr$MonthlyIncome & employeeHr$MonthlyIncome <= 50000 , "0 to 50k",
-       ifelse(50000 < employeeHr$MonthlyIncome & employeeHr$MonthlyIncome <= 100000 , "50k to 100k",
-       ifelse(100000 < employeeHr$MonthlyIncome & employeeHr$MonthlyIncome <= 150000 , "100k to 150k", "more than 150k")
-       ))
+                                ifelse(50000 < employeeHr$MonthlyIncome & employeeHr$MonthlyIncome <= 100000 , "50k to 100k",
+                                       ifelse(100000 < employeeHr$MonthlyIncome & employeeHr$MonthlyIncome <= 150000 , "100k to 150k", "more than 150k")
+                                ))
 
 newsaldf = employeeHr[,c("Attrition", "incomegroup")]
 plot_grid(ggplot(employeeHr, aes(x=Attrition,y=MonthlyIncome)) + geom_boxplot(),
@@ -248,3 +247,52 @@ plot_grid(ggplot(employeeHr, aes(x=Attrition,y=MonthlyIncome)) + geom_boxplot(),
 # Which is right as Salary is one of tha major reason people change jobs for
 # Employees wh are paid less than 100k are more prone to leave org than othes, specially one getting 0 to 50k
 
+##### Drop variable with just one value #####
+employeeHr <- Filter(function(x)(length(unique(x))>1), employeeHr)
+
+##### Outlier treatment for contiuous variables #####
+list_of_num_cols <- c("Age", "DistanceFromHome", "MonthlyIncome", "PercentSalaryHike", "TotalWorkingYears", "YearsAtCompany", "YearsSinceLastPromotion", "YearsWithCurrManager",  "avg_wrokhours_per_week", "Num_of_days_off")
+# Total unique values in each column 
+apply(employeeHr[,list_of_num_cols], 2, function(x)length(unique(x)))
+
+# checking if there are outliers in numerical columns
+apply(employeeHr[,list_of_num_cols], 2, function(x)length(boxplot.stats(x)$out))
+
+xx = sapply(employeeHr[,list_of_num_cols], 
+       function(x) quantile(x,seq(0,1,.01),na.rm = T))
+
+# variables that need outlier treatment
+# MonthlyIncome, YearsSinceLastPromotion, YearsAtCompany, TotalWorkingYears, YearsWithCurrManager, avg_wrokhours_per_week
+
+## Imputing Outliers with median value
+out_pos_inc <- which(employeeHr$MonthlyIncome %in% boxplot.stats(employeeHr$MonthlyIncome)$out)
+employeeHr$MonthlyIncome[out_pos_inc] <- NA
+employeeHr$MonthlyIncome[is.na(employeeHr$MonthlyIncome)] <- median(employeeHr$MonthlyIncome, na.rm = TRUE)
+
+out_pos_ylp <- which(employeeHr$YearsSinceLastPromotion %in% boxplot.stats(employeeHr$YearsSinceLastPromotion)$out)
+employeeHr$YearsSinceLastPromotion[out_pos_ylp] <- NA
+employeeHr$YearsSinceLastPromotion[is.na(employeeHr$YearsSinceLastPromotion)] <- median(employeeHr$YearsSinceLastPromotion, na.rm = TRUE)
+
+out_pos_yac <- which(employeeHr$YearsAtCompany %in% boxplot.stats(employeeHr$YearsAtCompany)$out)
+employeeHr$YearsAtCompany[out_pos_yac] <- NA
+employeeHr$YearsAtCompany[is.na(employeeHr$YearsAtCompany)] <- median(employeeHr$YearsAtCompany, na.rm = TRUE)
+
+out_pos_twy <- which(employeeHr$TotalWorkingYears %in% boxplot.stats(employeeHr$TotalWorkingYears)$out)
+employeeHr$TotalWorkingYears[out_pos_twy] <- NA
+employeeHr$TotalWorkingYears[is.na(employeeHr$TotalWorkingYears)] <- median(employeeHr$TotalWorkingYears, na.rm = TRUE)
+
+out_pos_cmy<- which(employeeHr$YearsWithCurrManager %in% boxplot.stats(employeeHr$YearsWithCurrManager)$out)
+employeeHr$YearsWithCurrManager[out_pos_cmy] <- NA
+employeeHr$YearsWithCurrManager[is.na(employeeHr$YearsWithCurrManager)] <- median(employeeHr$YearsWithCurrManager, na.rm = TRUE)
+
+out_pos_awh <- which(employeeHr$avg_wrokhours_per_week %in% boxplot.stats(employeeHr$avg_wrokhours_per_week)$out)
+employeeHr$avg_wrokhours_per_week[out_pos_awh] <- NA
+employeeHr$avg_wrokhours_per_week[is.na(employeeHr$avg_wrokhours_per_week)] <- median(employeeHr$avg_wrokhours_per_week, na.rm = TRUE)
+
+##### Dummy Variable Creation #####
+factor_Variables <- c("EnvironmentSatisfaction", "JobSatisfaction", "WorkLifeBalance", "BusinessTravel", "Department", "Education", "EducationField", "Gender", "JobLevel", "JobRole", "MaritalStatus", "StockOptionLevel", "JobInvolvement", "PerformanceRating", "overtime", "incomegroup" )
+fact_table <- employeeHr[,factor_Variables]
+non_fact_table <- employeeHr[,!colnames(employeeHr) %in% factor_Variables]
+
+dummies<- data.frame(sapply(fact_table, 
+                            function(x) data.frame(model.matrix(~x-1,data =fact_table))[,-1]))
