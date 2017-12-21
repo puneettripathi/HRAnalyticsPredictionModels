@@ -234,16 +234,17 @@ plot_grid(ggplot(employeeHr, aes(x=as.factor(TrainingTimesLastYear),fill=Attriti
 # And people leaving company are mainly those with 2 to 3 trainings
 # Median is also at 75th %ile which is 3 trainings per year, data is highly skewed
 
-ggplot(employeeHr, aes(x=Attrition,y=MonthlyIncome)) + geom_boxplot()
+# Salary Analysis
+employeeHr$incomegroup = ifelse(0 < employeeHr$MonthlyIncome & employeeHr$MonthlyIncome <= 50000 , "0 to 50k",
+       ifelse(50000 < employeeHr$MonthlyIncome & employeeHr$MonthlyIncome <= 100000 , "50k to 100k",
+       ifelse(100000 < employeeHr$MonthlyIncome & employeeHr$MonthlyIncome <= 150000 , "100k to 150k", "more than 150k")
+       ))
+
+newsaldf = employeeHr[,c("Attrition", "incomegroup")]
+plot_grid(ggplot(employeeHr, aes(x=Attrition,y=MonthlyIncome)) + geom_boxplot(),
+          ggplot(employeeHr, aes(x=MonthlyIncome)) + geom_histogram(bins=40),
+          ggplot(newsaldf, aes(x=as.factor(incomegroup),fill=Attrition))+ geom_bar())
 # people leaving jobs are relatively low paid
 # Which is right as Salary is one of tha major reason people change jobs for
-
-
-#set.seed(1)
-#df <- data.frame(y=abs(rnorm(6)),
-#                 x=rep(as.Date(c('2011-01-01','2011-01-03','2011-01-10')),
-#                       times = 2),
-#                 g = factor(rep(c(1,2), each = 3)))    
-#ggplot(aes(x=x, y=y, group = g, fill = g), data = df) +
-#  geom_bar(stat = 'identity', position = 'dodge')
+# Employees wh are paid less than 100k are more prone to leave org than othes, specially one getting 0 to 50k
 
