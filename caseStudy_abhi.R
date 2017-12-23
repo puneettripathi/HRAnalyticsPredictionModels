@@ -1,5 +1,5 @@
 # Comment the next line
-#setwd("D:/pgdds/Logistic Regression/LogisticRegressionCaseStudy")
+setwd("D:/pgdds/Logistic Regression/LogisticRegressionCaseStudy")
 ##### Importing the necessary libraries #####
 library(MASS)
 library(car)
@@ -176,7 +176,7 @@ summary(factor(employeeHr$AgeGroup))
 # Master dataset
 View(employeeHr) 
 length(names(employeeHr))
-#38 Columns
+#33 Columns
 
 ##### Start of EDA #####
 # Create theme for bar plot
@@ -224,19 +224,13 @@ plot_grid(ggplot(employeeHr, aes(x=StockOptionLevel,fill=Attrition))+ geom_bar()
 # All of these variables looks important as they have significant attrition spread
 # StockOptionLevel and JobInvolvement looks like key
 
-plot_grid(ggplot(employeeHr, aes(x=as.factor(NumCompaniesWorked),fill=Attrition))+ geom_bar()+bar_theme1,
-          ggplot(employeeHr, aes(x=as.factor(CmpWorkGroup),fill=Attrition))+ geom_bar()+bar_theme1)
+ggplot(employeeHr, aes(x=as.factor(NumCompaniesWorked),fill=Attrition))+ geom_bar()+bar_theme1
 #Most people leaving have worked in 1 company or if it is their 1st company
-#Segmented Variable gives better picture, that people with 0-2 companies or 6-8 are more prone to switch
-# we will use CmpWorkGroup
 
 plot_grid(ggplot(employeeHr, aes(x=as.factor(YearsWithCurrManager),fill=Attrition))+ geom_bar()+bar_theme1,
-          ggplot(employeeHr, aes(x=as.factor(CurrentMgrTimeSeg),fill=Attrition))+ geom_bar()+bar_theme1,
           ggplot(employeeHr, aes(x=Attrition,y=YearsWithCurrManager)) + geom_boxplot())
 # Years with manager looks to be a key in attrition
 # People who have left have a median relation of 2.5 years with current manager
-# But when we look at segmented variable we see that people with less than 2 years of exp with manager or with 6 to 8 years of exp
-# are more prone to leave company
 
 plot_grid(ggplot(employeeHr, aes(x=Attrition,y=DistanceFromHome)) + geom_boxplot(),
           ggplot(employeeHr, aes(x=DistanceFromHome)) + geom_histogram(bins = 15),
@@ -261,18 +255,17 @@ plot_grid(ggplot(employeeHr, aes(x=Attrition,y=PercentSalaryHike)) + geom_boxplo
 
 plot_grid(ggplot(employeeHr, aes(x=Attrition,y=TotalWorkingYears)) + geom_boxplot(),
           ggplot(employeeHr, aes(x=TotalWorkingYears)) + geom_histogram(bins = 40),
-          ggplot(employeeHr, aes(x=as.factor(TotalWorkingYears),fill=Attrition))+ geom_bar()+bar_theme1,
-          ggplot(employeeHr, aes(x=as.factor(WorkYearSeg),fill=Attrition))+ geom_bar()+bar_theme1)
+          ggplot(employeeHr, aes(x=as.factor(TotalWorkingYears),fill=Attrition))+ geom_bar()+bar_theme1)
 # People leaving company have median 7 years of experience and have relatively lower overall experience
 # This might mean as people get more experienced they tend to stay at same company for longer time
-# From segmented Bar plot, we can veerify above hypothesis, that people with lower work exp tend to leave jobs more
-# We will use WorkYearSeg for further analysis and drop TotalWorkingYears
+
 
 plot_grid(ggplot(employeeHr, aes(x=as.factor(YearsSinceLastPromotion),fill=Attrition))+ geom_bar()+bar_theme1,
-          ggplot(employeeHr, aes(x=as.factor(LastPromotionSeg),fill=Attrition))+ geom_bar()+bar_theme1 )
+          ggplot(employeeHr, aes(x=Attrition,y=YearsSinceLastPromotion)) + geom_boxplot(),
+          ggplot(employeeHr, aes(x=YearsSinceLastPromotion)) + geom_histogram(bins = 40))
 # Looks like people are trying to change job soon after getting promotion
 # that might make sense as well because that means reaching higher salary/ higher grade jump in relatively lower time span
-# The segmentated vaiable captures the data variablitily better and smoother, we will use that
+
 
 plot_grid(ggplot(employeeHr, aes(x=Attrition,y=avg_workhours_per_week)) + geom_boxplot(),
           ggplot(employeeHr, aes(x=avg_workhours_per_week)) + geom_histogram(bins = 40))
@@ -282,11 +275,10 @@ plot_grid(ggplot(employeeHr, aes(x=Attrition,y=avg_workhours_per_week)) + geom_b
 ggplot(employeeHr, aes(x=Attrition,y=Num_of_days_off)) + geom_boxplot()
 # People resigning are those who are generally take fewer holidays in a year
 
-plot_grid(ggplot(employeeHr, aes(x=as.factor(CompanyYearSeg),fill=Attrition))+ geom_bar()+bar_theme1,
-          ggplot(employeeHr, aes(x=as.factor(YearsAtCompany),fill=Attrition))+ geom_bar()+bar_theme1)
+plot_grid(ggplot(employeeHr, aes(x=as.factor(YearsAtCompany),fill=Attrition))+ geom_bar()+bar_theme1,
+          ggplot(employeeHr, aes(x=Attrition,y=YearsAtCompany)) + geom_boxplot(),
+          ggplot(employeeHr, aes(x=YearsAtCompany)) + geom_histogram(bins=10))
 # People who have spent lesser time at company tends to resign more
-# Segmented Variable gives a clear picture about it and is reasonably correlated with attrition. 
-# We can say from segmented graph that lesser the number of years at company higher is risk of attrtion
 
 plot_grid(ggplot(employeeHr, aes(x=as.factor(TrainingTimesLastYear),fill=Attrition))+ geom_bar(),
           ggplot(employeeHr, aes(x=Attrition,y=TrainingTimesLastYear)) + geom_boxplot(),
@@ -314,13 +306,12 @@ employeeHr <- Filter(function(x)(length(unique(x))>1), employeeHr)
 
 # Drop Variables which we have created Segmented Variable for
 employeeHr <- employeeHr[, !(colnames(employeeHr) %in% 
-                               c('Age','incomegroup'
-                                 #'NumCompaniesWorked', "YearsSinceLastPromotion",
-                                 #"YearsWithCurrManager", "YearsAtCompany", "TotalWorkingYears",
-                                 ))]
+                               c('Age','incomegroup'))]
 
 ##### Outlier treatment for contiuous variables #####
-list_of_num_cols <- c("DistanceFromHome", "MonthlyIncome", "PercentSalaryHike",
+list_of_num_cols <- c("DistanceFromHome", "MonthlyIncome", "NumCompaniesWorked",
+                      "TotalWorkingYears", "PercentSalaryHike", "YearsAtCompany",
+                      "YearsSinceLastPromotion", "YearsWithCurrManager",
                       "avg_workhours_per_week", "Num_of_days_off")
 # Total unique values in each column 
 apply(employeeHr[,list_of_num_cols], 2, function(x)length(unique(x)))
@@ -343,13 +334,28 @@ out_pos_awh <- which(employeeHr$avg_workhours_per_week %in% boxplot.stats(employ
 employeeHr$avg_workhours_per_week[out_pos_awh] <- NA
 employeeHr$avg_workhours_per_week[is.na(employeeHr$avg_workhours_per_week)] <- median(employeeHr$avg_workhours_per_week, na.rm = TRUE)
 
+out_pos_ylp <- which(employeeHr$YearsSinceLastPromotion %in% boxplot.stats(employeeHr$YearsSinceLastPromotion)$out)
+employeeHr$YearsSinceLastPromotion[out_pos_ylp] <- NA
+employeeHr$YearsSinceLastPromotion[is.na(employeeHr$YearsSinceLastPromotion)] <- median(employeeHr$YearsSinceLastPromotion, na.rm = TRUE)
+
+out_pos_yac <- which(employeeHr$YearsAtCompany %in% boxplot.stats(employeeHr$YearsAtCompany)$out)
+employeeHr$YearsAtCompany[out_pos_yac] <- NA
+employeeHr$YearsAtCompany[is.na(employeeHr$YearsAtCompany)] <- median(employeeHr$YearsAtCompany, na.rm = TRUE)
+
+out_pos_twy <- which(employeeHr$TotalWorkingYears %in% boxplot.stats(employeeHr$TotalWorkingYears)$out)
+employeeHr$TotalWorkingYears[out_pos_twy] <- NA
+employeeHr$TotalWorkingYears[is.na(employeeHr$TotalWorkingYears)] <- median(employeeHr$TotalWorkingYears, na.rm = TRUE)
+
+out_pos_cmy<- which(employeeHr$YearsWithCurrManager %in% boxplot.stats(employeeHr$YearsWithCurrManager)$out)
+employeeHr$YearsWithCurrManager[out_pos_cmy] <- NA
+employeeHr$YearsWithCurrManager[is.na(employeeHr$YearsWithCurrManager)] <- median(employeeHr$YearsWithCurrManager, na.rm = TRUE)
+
 ##### Dummy Variable Creation #####
-factor_Variables <- c(#"WorkYearSeg", "CompanyYearSeg", "CurrentMgrTimeSeg", "LastPromotionSeg",
-                      "AgeGroup", #"CmpWorkGroup",
-                      "EnvironmentSatisfaction", "JobSatisfaction", "WorkLifeBalance",
-                      "BusinessTravel", "Department", "Education", "EducationField",
-                      "Gender", "JobLevel", "JobRole", "MaritalStatus", "StockOptionLevel",
-                      "JobInvolvement", "PerformanceRating", "overtime" )
+factor_Variables <- c("AgeGroup",
+  "EnvironmentSatisfaction", "JobSatisfaction", "WorkLifeBalance",
+  "BusinessTravel", "Department", "Education", "EducationField",
+  "Gender", "JobLevel", "JobRole", "MaritalStatus", "StockOptionLevel",
+  "JobInvolvement", "PerformanceRating", "overtime" )
 fact_table <- employeeHr[,factor_Variables]
 fact_table$EnvironmentSatisfaction <- as.factor(fact_table$EnvironmentSatisfaction)
 fact_table$JobSatisfaction <- as.factor(fact_table$JobSatisfaction)
@@ -384,7 +390,7 @@ set.seed(100)
 trainindices= sample(1:nrow(final_df), 0.7*nrow(final_df))
 train = final_df[trainindices,]
 test = final_df[-trainindices,]
-
+train = train[,-1]
 
 ##### Start building Logistic Regression Model here #####
 
@@ -394,6 +400,7 @@ summary(model_1) #AIC 2954.2 coeff : nullDev 3895.7, resDev 2794.2
 
 # Stepwise selection
 model_2 <- stepAIC(model_1, direction="both")
+
 
 # Let's create a model as suggested by stepAIC method:
 model_3 <- glm(formula = Attrition ~ NumCompaniesWorked + TotalWorkingYears + 
@@ -530,19 +537,19 @@ vif(model_9)
 
 # Removing variable StockOptionLevel.x3, high p-value=0.111230
 model_10 <- glm(formula = Attrition ~ NumCompaniesWorked + TotalWorkingYears + 
-                 TrainingTimesLastYear + AgeGroup.xover_50 + 
-                 AgeGroup.xUnder_30 + EnvironmentSatisfaction.x2 + EnvironmentSatisfaction.x3 + 
-                 EnvironmentSatisfaction.x4 + JobSatisfaction.x2 + JobSatisfaction.x3 + 
-                 JobSatisfaction.x4 + WorkLifeBalance.x2 + WorkLifeBalance.x3 + 
-                 WorkLifeBalance.x4 + BusinessTravel.xTravel_Frequently + 
-                 BusinessTravel.xTravel_Rarely + Department.xResearch...Development + 
-                 Department.xSales + 
-                 EducationField.xTechnical.Degree + 
-                 JobLevel.x5 + JobRole.xManager + 
-                 JobRole.xManufacturing.Director + JobRole.xResearch.Director + 
-                 JobRole.xSales.Executive + MaritalStatus.xMarried + MaritalStatus.xSingle + 
-                 StockOptionLevel.x1 + JobInvolvement.x3 + 
-                 overtime, family = "binomial", data = train)
+                  TrainingTimesLastYear + AgeGroup.xover_50 + 
+                  AgeGroup.xUnder_30 + EnvironmentSatisfaction.x2 + EnvironmentSatisfaction.x3 + 
+                  EnvironmentSatisfaction.x4 + JobSatisfaction.x2 + JobSatisfaction.x3 + 
+                  JobSatisfaction.x4 + WorkLifeBalance.x2 + WorkLifeBalance.x3 + 
+                  WorkLifeBalance.x4 + BusinessTravel.xTravel_Frequently + 
+                  BusinessTravel.xTravel_Rarely + Department.xResearch...Development + 
+                  Department.xSales + 
+                  EducationField.xTechnical.Degree + 
+                  JobLevel.x5 + JobRole.xManager + 
+                  JobRole.xManufacturing.Director + JobRole.xResearch.Director + 
+                  JobRole.xSales.Executive + MaritalStatus.xMarried + MaritalStatus.xSingle + 
+                  StockOptionLevel.x1 + JobInvolvement.x3 + 
+                  overtime, family = "binomial", data = train)
 # Let us look at the summary and vif of the model
 summary(model_10)
 vif(model_10)
