@@ -1,5 +1,3 @@
-setwd('C:\\Users\\putripat\\Downloads\\PA-I_Case_Study_HR_Analytics')
-
 # Comment the next line
 setwd("D:/pgdds/Logistic Regression/LogisticRegressionCaseStudy")
 ##### Importing the necessary libraries #####
@@ -125,6 +123,43 @@ employeeHr<- merge(employeeHr,metrics_emptime, by="EmployeeID", all = F)
 #Create deried metric - if person works overtime or not
 employeeHr$overtime = ifelse(employeeHr$avg_wrokhours_per_week/40> 1, 1, 0) 
 colnames(employeeHr)[names(employeeHr) == "emp_extraOffs$Num_of_days_off"] = "Num_of_days_off"
+
+# Create AgeGroups
+unique(employeeHr$Age)
+# AgeGroups 20_30, 30_40, 40_50, ovr_50
+employeeHr$AgeGroup <- ifelse(20 < employeeHr$Age & employeeHr$Age <= 30 , "20_30",
+                                ifelse(30 < employeeHr$Age & employeeHr$Age <= 40 , "31_40",
+                                       ifelse(40 < employeeHr$Age & employeeHr$Age <= 50 , "41_50", "over_50")
+                                ))
+
+
+# Create groups for NumCompaniesWorked
+employeeHr$CmpWorkGroup = ifelse(employeeHr$NumCompaniesWorked <= 2 , "0_2",
+                                 ifelse(2 < employeeHr$NumCompaniesWorked & employeeHr$NumCompaniesWorked <= 5 , "3_5",
+                                        ifelse(5 < employeeHr$NumCompaniesWorked & employeeHr$NumCompaniesWorked <= 8 , "6_8", 
+                                               "over_8")
+                                 ))
+
+# Creating segments of YearsSinceLastPromotion
+
+employeeHr$LastPromotionSeg = ifelse(employeeHr$YearsSinceLastPromotion <= 2 , "0_2",
+                                 ifelse(2 < employeeHr$YearsSinceLastPromotion & employeeHr$YearsSinceLastPromotion <= 5 , "3_5",
+                                        "over_5"))
+
+# Create groups for YearsWithCurrManager
+employeeHr$CurrentMgrTimeSeg = ifelse(employeeHr$YearsWithCurrManager <= 2 , "0_2",
+                                 ifelse(2 < employeeHr$YearsWithCurrManager & employeeHr$YearsWithCurrManager <= 5 , "3_5",
+                                        ifelse(5 < employeeHr$YearsWithCurrManager & employeeHr$YearsWithCurrManager <= 8 , "6_8", 
+                                               "over_8")
+                                 ))
+
+# Create groups for YearsAtCompany
+employeeHr$CompanyYearSeg = ifelse(employeeHr$YearsAtCompany <= 2 , "0_2",
+                                      ifelse(2 < employeeHr$YearsAtCompany & employeeHr$YearsAtCompany <= 5 , "3_5",
+                                             ifelse(5 < employeeHr$YearsAtCompany & employeeHr$YearsAtCompany <= 8 , "6_8", 
+                                                    ifelse(8 < employeeHr$YearsAtCompany & employeeHr$YearsAtCompany <= 11 , "8_11",
+                                                    "over_11"))))
+
 # Master dataset
 View(employeeHr) 
 length(names(employeeHr))
@@ -177,12 +212,18 @@ plot_grid(ggplot(employeeHr, aes(x=StockOptionLevel,fill=Attrition))+ geom_bar()
 # StockOptionLevel and JobInvolvement looks like key
 
 plot_grid(ggplot(employeeHr, aes(x=as.factor(NumCompaniesWorked),fill=Attrition))+ geom_bar()+bar_theme1,
-          ggplot(employeeHr, aes(x=Attrition,y=NumCompaniesWorked)) + geom_boxplot())
-#Most people leaving have worked in 1 ompany or if it is their 1st company
+          ggplot(employeeHr, aes(x=as.factor(CmpWorkGroup),fill=Attrition))+ geom_bar()+bar_theme1)
+#Most people leaving have worked in 1 company or if it is their 1st company
+#Segmented Variable gives better picture, that people with 0-2 companies or 6-8 are more prone to switch
+# we will use CmpWorkGroup
 
-ggplot(employeeHr, aes(x=Attrition,y=YearsWithCurrManager)) + geom_boxplot()
+plot_grid(ggplot(employeeHr, aes(x=as.factor(YearsWithCurrManager),fill=Attrition))+ geom_bar()+bar_theme1,
+          ggplot(employeeHr, aes(x=as.factor(CurrentMgrTimeSeg),fill=Attrition))+ geom_bar()+bar_theme1,
+          ggplot(employeeHr, aes(x=Attrition,y=YearsWithCurrManager)) + geom_boxplot())
 # Years with manager looks to be a key in attrition
 # People who have left have a median relation of 2.5 years with current manager
+# But when we look at segmented variable we see that people with less than 2 years of exp with manager or with 6 to 8 years of exp
+# are more prone to leave company
 
 plot_grid(ggplot(employeeHr, aes(x=Attrition,y=DistanceFromHome)) + geom_boxplot(),
           ggplot(employeeHr, aes(x=DistanceFromHome)) + geom_histogram(bins = 15),
@@ -193,10 +234,11 @@ plot_grid(ggplot(employeeHr, aes(x=Attrition,y=DistanceFromHome)) + geom_boxplot
 
 plot_grid(ggplot(employeeHr, aes(x=Attrition,y=Age)) + geom_boxplot(),
           ggplot(employeeHr, aes(x=Age)) + geom_histogram(bins=25),
+          ggplot(employeeHr, aes(x=AgeGroup,fill=Attrition))+ geom_bar(position = "dodge")+bar_theme1,
           align="h")
 # Mostly work force has age between 25 to 50
 # People resigning appears to be relatively younger ones
-
+# We will use AgeGourp for modeling as it gives a creaer picture, So dropping Age
 
 plot_grid(ggplot(employeeHr, aes(x=Attrition,y=PercentSalaryHike)) + geom_boxplot(),
           ggplot(employeeHr, aes(x=PercentSalaryHike)) + geom_histogram(bins=15))
@@ -209,9 +251,11 @@ plot_grid(ggplot(employeeHr, aes(x=Attrition,y=TotalWorkingYears)) + geom_boxplo
 # People leaving company have median 7 years of experience and have relatively lower overall experience
 # This might mean as people get more experienced they tend to stay at same company for longer time
 
-ggplot(employeeHr, aes(x=Attrition,y=YearsSinceLastPromotion)) + geom_boxplot()
+plot_grid(ggplot(employeeHr, aes(x=as.factor(YearsSinceLastPromotion),fill=Attrition))+ geom_bar()+bar_theme1,
+          ggplot(employeeHr, aes(x=as.factor(LastPromotionSeg),fill=Attrition))+ geom_bar()+bar_theme1 )
 # Looks like people are trying to change job soon after getting promotion
 # that might make sense as well because that means reaching higher salary/ higher grade jump in relatively lower time span
+# The segmentated vaiable captures the data variablitily better and smoother, we will use that
 
 plot_grid(ggplot(employeeHr, aes(x=Attrition,y=avg_wrokhours_per_week)) + geom_boxplot(),
           ggplot(employeeHr, aes(x=avg_wrokhours_per_week)) + geom_histogram(bins = 40))
@@ -221,10 +265,11 @@ plot_grid(ggplot(employeeHr, aes(x=Attrition,y=avg_wrokhours_per_week)) + geom_b
 ggplot(employeeHr, aes(x=Attrition,y=Num_of_days_off)) + geom_boxplot()
 # People resigning are those who are generally take fewer holidays in a year
 
-plot_grid(ggplot(employeeHr, aes(x=Attrition,y=YearsAtCompany)) + geom_boxplot(),
-          ggplot(employeeHr, aes(x=YearsAtCompany)) + geom_histogram(bins=15))
+plot_grid(ggplot(employeeHr, aes(x=as.factor(CompanyYearSeg),fill=Attrition))+ geom_bar()+bar_theme1,
+          ggplot(employeeHr, aes(x=as.factor(YearsAtCompany),fill=Attrition))+ geom_bar()+bar_theme1)
 # People who have spent lesser time at company tends to resign more
-# Mostly people have stayed less than 10 years at the company
+# Segmented Variable gives a clear picture about it and is reasonably correlated with attrition. 
+# We can say from segmented graph that lesser the number of years at company higher is risk of attrtion
 
 plot_grid(ggplot(employeeHr, aes(x=as.factor(TrainingTimesLastYear),fill=Attrition))+ geom_bar(),
           ggplot(employeeHr, aes(x=Attrition,y=TrainingTimesLastYear)) + geom_boxplot(),
@@ -249,9 +294,9 @@ plot_grid(ggplot(employeeHr, aes(x=Attrition,y=MonthlyIncome)) + geom_boxplot(),
 
 ##### Drop variable with just one value #####
 employeeHr <- Filter(function(x)(length(unique(x))>1), employeeHr)
-
+employeeHr <- employeeHr[, !(colnames(employeeHr) %in% c('Age','NumCompaniesWorked', "YearsSinceLastPromotion", "YearsWithCurrManager", "YearsAtCompany"))]
 ##### Outlier treatment for contiuous variables #####
-list_of_num_cols <- c("Age", "DistanceFromHome", "MonthlyIncome", "PercentSalaryHike", "TotalWorkingYears", "YearsAtCompany", "YearsSinceLastPromotion", "YearsWithCurrManager",  "avg_wrokhours_per_week", "Num_of_days_off")
+list_of_num_cols <- c("DistanceFromHome", "MonthlyIncome", "PercentSalaryHike", "TotalWorkingYears", "avg_wrokhours_per_week", "Num_of_days_off")
 # Total unique values in each column 
 apply(employeeHr[,list_of_num_cols], 2, function(x)length(unique(x)))
 
@@ -262,35 +307,23 @@ xx = sapply(employeeHr[,list_of_num_cols],
        function(x) quantile(x,seq(0,1,.01),na.rm = T))
 
 # variables that need outlier treatment
-# MonthlyIncome, YearsSinceLastPromotion, YearsAtCompany, TotalWorkingYears, YearsWithCurrManager, avg_wrokhours_per_week
+# MonthlyIncome, TotalWorkingYears, YearsWithCurrManager, avg_wrokhours_per_week
 
 ## Imputing Outliers with median value
 out_pos_inc <- which(employeeHr$MonthlyIncome %in% boxplot.stats(employeeHr$MonthlyIncome)$out)
 employeeHr$MonthlyIncome[out_pos_inc] <- NA
 employeeHr$MonthlyIncome[is.na(employeeHr$MonthlyIncome)] <- median(employeeHr$MonthlyIncome, na.rm = TRUE)
 
-out_pos_ylp <- which(employeeHr$YearsSinceLastPromotion %in% boxplot.stats(employeeHr$YearsSinceLastPromotion)$out)
-employeeHr$YearsSinceLastPromotion[out_pos_ylp] <- NA
-employeeHr$YearsSinceLastPromotion[is.na(employeeHr$YearsSinceLastPromotion)] <- median(employeeHr$YearsSinceLastPromotion, na.rm = TRUE)
-
-out_pos_yac <- which(employeeHr$YearsAtCompany %in% boxplot.stats(employeeHr$YearsAtCompany)$out)
-employeeHr$YearsAtCompany[out_pos_yac] <- NA
-employeeHr$YearsAtCompany[is.na(employeeHr$YearsAtCompany)] <- median(employeeHr$YearsAtCompany, na.rm = TRUE)
-
 out_pos_twy <- which(employeeHr$TotalWorkingYears %in% boxplot.stats(employeeHr$TotalWorkingYears)$out)
 employeeHr$TotalWorkingYears[out_pos_twy] <- NA
 employeeHr$TotalWorkingYears[is.na(employeeHr$TotalWorkingYears)] <- median(employeeHr$TotalWorkingYears, na.rm = TRUE)
-
-out_pos_cmy<- which(employeeHr$YearsWithCurrManager %in% boxplot.stats(employeeHr$YearsWithCurrManager)$out)
-employeeHr$YearsWithCurrManager[out_pos_cmy] <- NA
-employeeHr$YearsWithCurrManager[is.na(employeeHr$YearsWithCurrManager)] <- median(employeeHr$YearsWithCurrManager, na.rm = TRUE)
 
 out_pos_awh <- which(employeeHr$avg_wrokhours_per_week %in% boxplot.stats(employeeHr$avg_wrokhours_per_week)$out)
 employeeHr$avg_wrokhours_per_week[out_pos_awh] <- NA
 employeeHr$avg_wrokhours_per_week[is.na(employeeHr$avg_wrokhours_per_week)] <- median(employeeHr$avg_wrokhours_per_week, na.rm = TRUE)
 
 ##### Dummy Variable Creation #####
-factor_Variables <- c("EnvironmentSatisfaction", "JobSatisfaction", "WorkLifeBalance", "BusinessTravel", "Department", "Education", "EducationField", "Gender", "JobLevel", "JobRole", "MaritalStatus", "StockOptionLevel", "JobInvolvement", "PerformanceRating", "overtime", "incomegroup" )
+factor_Variables <- c("CompanyYearSeg", "CurrentMgrTimeSeg", "LastPromotionSeg", "TrainingTimesLastYear", "AgeGroup", "CmpWorkGroup", "EnvironmentSatisfaction", "JobSatisfaction", "WorkLifeBalance", "BusinessTravel", "Department", "Education", "EducationField", "Gender", "JobLevel", "JobRole", "MaritalStatus", "StockOptionLevel", "JobInvolvement", "PerformanceRating", "overtime", "incomegroup" )
 fact_table <- employeeHr[,factor_Variables]
 non_fact_table <- employeeHr[,!colnames(employeeHr) %in% factor_Variables]
 
