@@ -818,7 +818,7 @@ final_model <- model_29
 #predicted probabilities of Attrition 1 for test data
 
 test_pred = predict(final_model, type = "response", 
-                    newdata = test[,-c(1,2)])
+                    newdata = test[,-1])
 
 # Let's see the summary 
 summary(test_pred)
@@ -844,9 +844,9 @@ perform_fn <- function(cutoff)
   return(out)
 }
 
-s = seq(.01,.80,length=200)
-OUT = matrix(0,200,3)
-for(i in 1:200)
+s = seq(.01,.80,length=100)
+OUT = matrix(0,100,3)
+for(i in 1:100)
 {
   OUT[i,] = perform_fn(s[i])
 } 
@@ -862,8 +862,10 @@ legend(0,.50,col=c(2,"darkgreen",4,"darkred"),lwd=c(2,2,2,2),c("Sensitivity","Sp
 
 
 cutoff <- s[which(abs(OUT[,1]-OUT[,2])<0.01)]
-# Let's choose a cutoff value of 0.1727638 for final model
-test_cutoff_attrition <- factor(ifelse(test_pred >=0.1727638, "Yes", "No"))
+cutoff
+
+# Let's choose a cutoff value of 0.1775758 for final model
+test_cutoff_attrition <- factor(ifelse(test_pred >=0.1775758, "Yes", "No"))
 conf_final <- confusionMatrix(test_cutoff_attrition, test_actual_attrition, positive = "Yes")
 acc <- conf_final$overall[1]
 sens <- conf_final$byClass[1]
@@ -886,7 +888,7 @@ ks_table_test <- attr(performance_measures_test, "y.values")[[1]] -
   (attr(performance_measures_test, "x.values")[[1]])
 
 max(ks_table_test)
-# KS-Statistics is 0.4535
+# KS-Statistics is 0.4642356
 
 ####################################################################
 # Lift & Gain Chart 
@@ -920,15 +922,31 @@ Attrition_decile = lift(test_actual_attrition, test_pred, groups = 10)
 ###### Results Explained ###### 
 # Ours is a fairly well performing model
 ### Variables explained --
-#NumCompaniesWorked --> The person is more likely to jump orgs in their early days
-#TotalWorkingYears --> this variable has a very low p-value and has stronger impact on attrition. The employees with higher work experience tend to stay longer at company
-#YearsAtCompany --> People who have spent lesser time at company tends to resign more
-#YearsSinceLastPromotion --> Has strong impact on attrition, people tend to leave company soon after getting promotion
-#avg_workhours_per_week --> Has strong impact on attrition, people who are working more hours, i.e. overworked employee, are more likely to leave company
-#AgeGroup.xUnder_30 --> it tells that people with age under 30 are more likely to change job than others
-#EnvironmentSatisfaction.x2 + EnvironmentSatisfaction.x3  - People who say that work environment is not so good are more likely to leave
-#EnvironmentSatisfaction.x4 --> this is a strange entry, it means that people who find environment satisfactory are also looking for change
-#JobSatisfaction.x4 --> People who are satisfied with their job are also leaving, which means that there are better opportunities they must be getting outside. It is time to evaluate what company offers its employees to work on
-#BusinessTravel.xTravel_Frequently --> People traveling frequently is coming out a factor for attrition, as it may be affecting their work life balance
-#JobRole.xManufacturing.Director --> employees who are director are leaving too, they might be looking for career progression
-#MaritalStatus.xSingle --> the employees who are single have higher chances of leaving than the ones married or divorced
+
+###Factors that affect adversely and attribute to increase in attrition are:
+  
+#NumCompaniesWorked - People who have worked in many companies before have higher chances of leaving.
+
+#YearsSinceLastPromotion - People who have not been promoted for a long time have higher chances of leaving.
+
+#avg_workhours_per_week - Has strong impact on attrition, people who are working more hours, i.e. overworked employee, are more likely to leave company.
+
+#AgeGroup.xUnder_30 - It tells that people with age under 30 are more likely to change job than others.
+
+#BusinessTravel.xTravel_Frequently - People traveling frequently is coming out a factor for attrition, as it may be affecting their work life balance.
+
+#MaritalStatus.xSingle - the employees who are single have higher chances of leaving than the ones married or divorced
+
+
+
+###Factors that keeps attrition in control:
+  
+#TotalWorkingYears - This variable has a very low p-value and has stronger impact on attrition. The employees with higher work experience tend to stay longer at company.
+
+#YearsAtCompany - People who have spent more time at company tends to stay with the company.
+
+#EnvironmentSatisfaction.x2/ x3 / x4- People who rated work environment as Medium/ High/ Very High are happy with the company environment and do not leave.
+
+#JobSatisfaction.x4 -People only who are very highly satisfied with their job are going to stay with the organization.
+
+#JobRole.xManufacturing.Director - Employees who are Director in manufacturing are satisfied with their role and tend to stay with the organization.
