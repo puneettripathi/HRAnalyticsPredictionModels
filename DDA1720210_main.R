@@ -516,18 +516,18 @@ vif(model_9)
 # let's now focus on p-value
 # Num_of_days_off has p-value of 0.215, let's remove this
 model_10 <- glm(formula = Attrition ~ NumCompaniesWorked + TotalWorkingYears + 
-                 TrainingTimesLastYear + YearsAtCompany + YearsSinceLastPromotion + 
-                 avg_workhours_per_week + AgeGroup.x41_50 + 
-                 AgeGroup.xUnder_30 + EnvironmentSatisfaction.x2 + EnvironmentSatisfaction.x3 + 
-                 EnvironmentSatisfaction.x4 + JobSatisfaction.x2 + JobSatisfaction.x3 + 
-                 JobSatisfaction.x4 + WorkLifeBalance.x3 + 
-                 WorkLifeBalance.x4 + BusinessTravel.xTravel_Frequently + Department.xResearch...Development + 
-                 Education.x5 + EducationField.xMarketing + EducationField.xMedical + EducationField.xOther + 
-                 EducationField.xTechnical.Degree + JobLevel.x5 + JobRole.xManager + 
-                 JobRole.xManufacturing.Director + JobRole.xResearch.Director + 
-                 JobRole.xSales.Executive + MaritalStatus.xSingle + 
-                 StockOptionLevel.x1 + StockOptionLevel.x3 + JobInvolvement.x3,
-               family = "binomial", data = train)
+                  TrainingTimesLastYear + YearsAtCompany + YearsSinceLastPromotion + 
+                  avg_workhours_per_week + AgeGroup.x41_50 + 
+                  AgeGroup.xUnder_30 + EnvironmentSatisfaction.x2 + EnvironmentSatisfaction.x3 + 
+                  EnvironmentSatisfaction.x4 + JobSatisfaction.x2 + JobSatisfaction.x3 + 
+                  JobSatisfaction.x4 + WorkLifeBalance.x3 + 
+                  WorkLifeBalance.x4 + BusinessTravel.xTravel_Frequently + Department.xResearch...Development + 
+                  Education.x5 + EducationField.xMarketing + EducationField.xMedical + EducationField.xOther + 
+                  EducationField.xTechnical.Degree + JobLevel.x5 + JobRole.xManager + 
+                  JobRole.xManufacturing.Director + JobRole.xResearch.Director + 
+                  JobRole.xSales.Executive + MaritalStatus.xSingle + 
+                  StockOptionLevel.x1 + StockOptionLevel.x3 + JobInvolvement.x3,
+                family = "binomial", data = train)
 # Let us look at the summary and vif of the model
 summary(model_10)
 
@@ -917,3 +917,18 @@ Attrition_decile = lift(test_actual_attrition, test_pred, groups = 10)
 # Here we reach 76.3% gain in first 4 deciles
 # and it outperform random model with a factor of 1.908213
 
+###### Results Explained ###### 
+# Ours is a fairly well performing model
+### Variables explained --
+#NumCompaniesWorked --> The person is more likely to jump orgs in their early days
+#TotalWorkingYears --> this variable has a very low p-value and has stronger impact on attrition. The employees with higher work experience tend to stay longer at company
+#YearsAtCompany --> People who have spent lesser time at company tends to resign more
+#YearsSinceLastPromotion --> Has strong impact on attrition, people tend to leave company soon after getting promotion
+#avg_workhours_per_week --> Has strong impact on attrition, people who are working more hours, i.e. overworked employee, are more likely to leave company
+#AgeGroup.xUnder_30 --> it tells that people with age under 30 are more likely to change job than others
+#EnvironmentSatisfaction.x2 + EnvironmentSatisfaction.x3  - People who say that work environment is not so good are more likely to leave
+#EnvironmentSatisfaction.x4 --> this is a strange entry, it means that people who find environment satisfactory are also looking for change
+#JobSatisfaction.x4 --> People who are satisfied with their job are also leaving, which means that there are better opportunities they must be getting outside. It is time to evaluate what company offers its employees to work on
+#BusinessTravel.xTravel_Frequently --> People traveling frequently is coming out a factor for attrition, as it may be affecting their work life balance
+#JobRole.xManufacturing.Director --> employees who are director are leaving too, they might be looking for career progression
+#MaritalStatus.xSingle --> the employees who are single have higher chances of leaving than the ones married or divorced
