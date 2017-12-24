@@ -1,5 +1,5 @@
 # Comment the next line
-setwd("D:/pgdds/Logistic Regression/LogisticRegressionCaseStudy")
+# setwd("D:/pgdds/Logistic Regression/LogisticRegressionCaseStudy")
 ##### Importing the necessary libraries #####
 library(MASS)
 library(car)
@@ -271,6 +271,7 @@ apply(employeeHr[,list_of_num_cols], 2, function(x)length(unique(x)))
 # checking if there are outliers in numerical columns
 apply(employeeHr[,list_of_num_cols], 2, function(x)length(boxplot.stats(x)$out))
 
+## Checking the matrix of values at all %iles
 xx = sapply(employeeHr[,list_of_num_cols], 
             function(x) quantile(x,seq(0,1,.01),na.rm = T))
 
@@ -279,26 +280,32 @@ xx = sapply(employeeHr[,list_of_num_cols],
 # TotalWorkingYears, YearsWithCurrManager
 
 ## Imputing Outliers with median value
+# MonthlyIncome
 out_pos_inc <- which(employeeHr$MonthlyIncome %in% boxplot.stats(employeeHr$MonthlyIncome)$out)
 employeeHr$MonthlyIncome[out_pos_inc] <- NA
 employeeHr$MonthlyIncome[is.na(employeeHr$MonthlyIncome)] <- median(employeeHr$MonthlyIncome, na.rm = TRUE)
 
+# avg_workhours_per_week
 out_pos_awh <- which(employeeHr$avg_workhours_per_week %in% boxplot.stats(employeeHr$avg_workhours_per_week)$out)
 employeeHr$avg_workhours_per_week[out_pos_awh] <- NA
 employeeHr$avg_workhours_per_week[is.na(employeeHr$avg_workhours_per_week)] <- median(employeeHr$avg_workhours_per_week, na.rm = TRUE)
 
+# YearsSinceLastPromotion
 out_pos_ylp <- which(employeeHr$YearsSinceLastPromotion %in% boxplot.stats(employeeHr$YearsSinceLastPromotion)$out)
 employeeHr$YearsSinceLastPromotion[out_pos_ylp] <- NA
 employeeHr$YearsSinceLastPromotion[is.na(employeeHr$YearsSinceLastPromotion)] <- median(employeeHr$YearsSinceLastPromotion, na.rm = TRUE)
 
+# YearsAtCompany
 out_pos_yac <- which(employeeHr$YearsAtCompany %in% boxplot.stats(employeeHr$YearsAtCompany)$out)
 employeeHr$YearsAtCompany[out_pos_yac] <- NA
 employeeHr$YearsAtCompany[is.na(employeeHr$YearsAtCompany)] <- median(employeeHr$YearsAtCompany, na.rm = TRUE)
 
+# TotalWorkingYears
 out_pos_twy <- which(employeeHr$TotalWorkingYears %in% boxplot.stats(employeeHr$TotalWorkingYears)$out)
 employeeHr$TotalWorkingYears[out_pos_twy] <- NA
 employeeHr$TotalWorkingYears[is.na(employeeHr$TotalWorkingYears)] <- median(employeeHr$TotalWorkingYears, na.rm = TRUE)
 
+# YearsWithCurrManager
 out_pos_cmy<- which(employeeHr$YearsWithCurrManager %in% boxplot.stats(employeeHr$YearsWithCurrManager)$out)
 employeeHr$YearsWithCurrManager[out_pos_cmy] <- NA
 employeeHr$YearsWithCurrManager[is.na(employeeHr$YearsWithCurrManager)] <- median(employeeHr$YearsWithCurrManager, na.rm = TRUE)
@@ -330,6 +337,11 @@ final_df <- cbind(Attrition,cont_var_df, dummies)
 ##### Seeing Correlation Matrix #####
 cormatt = cor(final_df[,-1])
 View(cormatt)
+#PerformanceRating and PercentSalaryHike are positively and highly correlated
+#YearsAtCompany and YearsWithCurrentManager are highly(+vely) correlated
+#BusinessTravely - Rarely and Frequently are highly negatively correlated ~ -0.8
+#overtime and avg_workhours_pw are highly correlated
+#Department - Sales & ResearchDevelopment are very highly correlated ~ -0.9
 
 ##### Splitting data in train and test #####
 set.seed(100)
@@ -904,3 +916,4 @@ lift <- function(labels , predicted_prob,groups=10) {
 Attrition_decile = lift(test_actual_attrition, test_pred, groups = 10)
 # Here we reach 76.3% gain in first 4 deciles
 # and it outperform random model with a factor of 1.908213
+
